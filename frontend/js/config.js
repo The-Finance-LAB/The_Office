@@ -6,7 +6,7 @@
 const CONFIG = {
   // Change this to your Render deployment URL (no trailing slash)
   // e.g., "https://the-office-api.onrender.com"
-  API_BASE_URL: "http://localhost:5000",
+  API_BASE_URL: "https://the-office-api-amse.onrender.com",
 
   // Timing (milliseconds)
   MESSAGE_DISPLAY_DELAY: 3000,   // 3 seconds between messages
