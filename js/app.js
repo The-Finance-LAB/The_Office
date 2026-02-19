@@ -17,6 +17,10 @@ let pollTimer = null;
 let displayTimer = null;
 let serverTypingAgent = null;
 
+// Smart scroll state
+let userHasScrolledUp = false;
+let missedMessages = 0;
+
 // ── DOM References ────────────────────────────────────────────────────
 const chatArea = document.getElementById('chatArea');
 const welcomeScreen = document.getElementById('welcomeScreen');
@@ -24,6 +28,7 @@ const messagesContainer = document.getElementById('messagesContainer');
 const inputForm = document.getElementById('inputForm');
 const questionInput = document.getElementById('questionInput');
 const sendBtn = document.getElementById('sendBtn');
+const scrollToBottomBtn = document.getElementById('scrollToBottomBtn');
 
 // ── Initialize ────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
@@ -42,13 +47,80 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!q || isRunning) return;
     startRoundtable(q);
   });
+
+  // Smart scroll detection — detect when user scrolls up
+  chatArea.addEventListener('scroll', onChatScroll);
+
+  // Scroll to bottom button click
+  scrollToBottomBtn.addEventListener('click', () => {
+    userHasScrolledUp = false;
+    missedMessages = 0;
+    updateScrollButton();
+    scrollToBottom();
+  });
 });
+
+// ── Smart Scroll Logic ───────────────────────────────────────────────
+function onChatScroll() {
+  if (!isRunning) return;
+
+  const threshold = 80; // pixels from bottom
+  const distanceFromBottom = chatArea.scrollHeight - chatArea.scrollTop - chatArea.clientHeight;
+
+  if (distanceFromBottom > threshold) {
+    // User scrolled up — pause auto-scroll
+    userHasScrolledUp = true;
+    updateScrollButton();
+  } else {
+    // User scrolled back to bottom — resume auto-scroll
+    userHasScrolledUp = false;
+    missedMessages = 0;
+    updateScrollButton();
+  }
+}
+
+function updateScrollButton() {
+  if (userHasScrolledUp && isRunning) {
+    scrollToBottomBtn.classList.add('visible');
+    // Update badge
+    const existingBadge = scrollToBottomBtn.querySelector('.new-msg-badge');
+    if (missedMessages > 0) {
+      if (existingBadge) {
+        existingBadge.textContent = missedMessages > 9 ? '9+' : missedMessages;
+      } else {
+        const badge = document.createElement('span');
+        badge.className = 'new-msg-badge';
+        badge.textContent = missedMessages > 9 ? '9+' : missedMessages;
+        scrollToBottomBtn.appendChild(badge);
+      }
+    } else if (existingBadge) {
+      existingBadge.remove();
+    }
+  } else {
+    scrollToBottomBtn.classList.remove('visible');
+    const existingBadge = scrollToBottomBtn.querySelector('.new-msg-badge');
+    if (existingBadge) existingBadge.remove();
+  }
+}
 
 // ── Scroll to bottom ──────────────────────────────────────────────────
 function scrollToBottom() {
   requestAnimationFrame(() => {
-    chatArea.scrollTop = chatArea.scrollHeight;
+    chatArea.scrollTo({
+      top: chatArea.scrollHeight,
+      behavior: 'smooth'
+    });
   });
+}
+
+// ── Smart scroll — only auto-scroll if user hasn't scrolled up ───────
+function smartScrollToBottom() {
+  if (!userHasScrolledUp) {
+    scrollToBottom();
+  } else {
+    missedMessages++;
+    updateScrollButton();
+  }
 }
 
 // ── Remove typing indicator ───────────────────────────────────────────
@@ -63,7 +135,7 @@ function showTypingIndicator(agentId) {
   const html = createTypingIndicator(agentId);
   messagesContainer.insertAdjacentHTML('beforeend', html);
   setSidebarActive(agentId);
-  scrollToBottom();
+  smartScrollToBottom();
 }
 
 // ── Process message queue with 3-second delays ────────────────────────
@@ -93,7 +165,7 @@ function showNext() {
   if (msg.type === 'separator') {
     removeTypingIndicator();
     messagesContainer.insertAdjacentHTML('beforeend', createSeparator(msg.text));
-    scrollToBottom();
+    smartScrollToBottom();
     displayTimer = setTimeout(showNext, 800);
     return;
   }
@@ -108,7 +180,7 @@ function showNext() {
     displayedCount++;
     updateProgress(displayedCount, CONFIG.TOTAL_AGENT_MESSAGES);
     setSidebarActive(msg.agentId);
-    scrollToBottom();
+    smartScrollToBottom();
 
     // Wait before showing next
     displayTimer = setTimeout(showNext, CONFIG.MESSAGE_DISPLAY_DELAY);
@@ -174,7 +246,7 @@ async function pollSession() {
     if (data.status === 'error') {
       messagesContainer.insertAdjacentHTML('beforeend',
         createErrorMessage(data.error || 'Unknown error'));
-      scrollToBottom();
+      smartScrollToBottom();
       isComplete = true;
       if (messageQueue.length === 0 && !processingQueue) {
         enableInput();
@@ -238,12 +310,15 @@ async function startRoundtable(question) {
 function finishMeeting() {
   removeTypingIndicator();
   messagesContainer.insertAdjacentHTML('beforeend', createEndOfMeeting());
-  scrollToBottom();
   setHeaderStatus('Meeting concluded', false);
   updateProgress(CONFIG.TOTAL_AGENT_MESSAGES, CONFIG.TOTAL_AGENT_MESSAGES);
   setSidebarActive(null);
   enableInput();
   isRunning = false;
+  userHasScrolledUp = false;
+  missedMessages = 0;
+  updateScrollButton();
+  scrollToBottom();
 }
 
 // ── Reset for new question ────────────────────────────────────────────
@@ -261,6 +336,9 @@ function resetState() {
   messageQueue.length = 0;
   processingQueue = false;
   serverTypingAgent = null;
+  userHasScrolledUp = false;
+  missedMessages = 0;
+  updateScrollButton();
 
   if (pollTimer) { clearTimeout(pollTimer); pollTimer = null; }
   if (displayTimer) { clearTimeout(displayTimer); displayTimer = null; }
