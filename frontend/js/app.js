@@ -134,21 +134,20 @@ async function pollSession() {
     }
 
     const data = await response.json();
+    const startId = lastSeenId;
 
     // Enqueue new messages
     for (let i = 0; i < data.messages.length; i++) {
       const msg = data.messages[i];
-      const msgIndex = after + i;
-      if (msgIndex >= lastSeenId) {
-        lastSeenId = msgIndex + 1;
-        const frontendAgentId = resolveAgentId(msg.agentId, msg.name);
-        enqueueMessage({
-          id: msgIndex,
-          agentId: frontendAgentId,
-          text: msg.text,
-          type: msg.type,
-        });
-      }
+      const msgIndex = startId + i;
+      lastSeenId = msgIndex + 1;
+      const frontendAgentId = resolveAgentId(msg.agentId, msg.name);
+      enqueueMessage({
+        id: msgIndex,
+        agentId: frontendAgentId,
+        text: msg.text,
+        type: msg.type,
+      });
     }
 
     // Track server typing state
