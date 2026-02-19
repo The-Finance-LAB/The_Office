@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Apple Brief — Analyst Roundtable</title>
+  <meta name="description" content="Multi-Agent Financial Analyst Roundtable powered by LangChain" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Background layers -->
+    <div class="bg-layers">
+      <div class="bg-gradient"></div>
+      <div class="bg-grid animated-grid"></div>
+      <div class="bg-glow"></div>
+    </div>
+
+    <!-- Main layout -->
+    <div class="main-layout">
+      <!-- Sidebar -->
+      <aside class="sidebar" id="sidebar"></aside>
+
+      <!-- Chat frame -->
+      <div class="chat-frame">
+        <!-- Header -->
+        <header class="chat-header glass-header" id="chatHeader"></header>
+
+        <!-- Chat area -->
+        <div class="chat-area chat-scroll" id="chatArea">
+          <!-- Welcome screen (shown initially) -->
+          <div class="welcome-screen" id="welcomeScreen"></div>
+
+          <!-- Messages container (hidden initially) -->
+          <div class="messages-container hidden" id="messagesContainer"></div>
+        </div>
+
+        <!-- Input bar -->
+        <form class="input-bar glass-header" id="inputForm">
+          <div class="input-wrapper glass-card">
+            <input
+              type="text"
+              id="questionInput"
+              placeholder="Ask the Chief Analyst a question about Apple..."
+              autocomplete="off"
+            />
+          </div>
+          <button type="submit" id="sendBtn" disabled>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 2L11 13" />
+              <path d="M22 2L15 22L11 13L2 9L22 2Z" />
+            </svg>
+          </button>
+        </form>
+      </div>
+
+      <!-- Right spacer -->
+      <div class="right-spacer"></div>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/agents.js"></script>
+  <script src="js/components.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

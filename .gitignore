@@ -1,0 +1,25 @@
+# Environment
+backend/.env
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Database (regenerated on startup)
+backend/db/
+
+# ChromaDB
+backend/chroma/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
