@@ -162,7 +162,7 @@ async function pollSession() {
     }
 
     // Check if done
-    if (data.status === 'complete') {
+    if (data.status === 'complete' || data.status === 'done') {
       isComplete = true;
       // Queue will handle showing end of meeting when drained
       if (messageQueue.length === 0 && !processingQueue) {
